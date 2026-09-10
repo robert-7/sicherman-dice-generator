@@ -7,7 +7,7 @@ import {
   Dices,
   ExternalLink,
   FlaskConical,
-  Github,
+  GitBranch,
   LoaderCircle,
   Sparkles,
 } from "lucide-react";
@@ -65,7 +65,7 @@ export default function App() {
           <span>Sicherman <b>Lab</b></span>
         </a>
         <a className="github-link" href="https://github.com/robert-7/sicherman-dice-generator" target="_blank" rel="noreferrer">
-          <Github size={17} /> GitHub <ExternalLink size={13} />
+          <GitBranch size={17} /> GitHub <ExternalLink size={13} />
         </a>
       </nav>
 
