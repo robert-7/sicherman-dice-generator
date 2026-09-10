@@ -85,8 +85,8 @@ export default function App() {
           </div>
 
           <div className="fields">
-            <NumberField label="Number of dice" value={dice} min={1} max={4} onChange={setDice} hint="1–4 dice" />
-            <NumberField label="Faces per die" value={faces} min={2} max={20} onChange={setFaces} hint="2–20 faces" />
+            <NumberField label="Number of dice" value={dice} min={1} max={4} onChange={setDice} hint="1-4 dice" />
+            <NumberField label="Faces per die" value={faces} min={2} max={20} onChange={setFaces} hint="2-20 faces" />
           </div>
 
           <button className="generate-button" type="submit" disabled={loading}>

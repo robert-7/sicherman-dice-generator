@@ -1,0 +1,86 @@
+---
+name: pre-commit
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pre-commit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    name: pre-commit (py ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # full history so diff refs are available
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Ruby (for running markdown linting during pre-commit)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      # Run only on the diff for PRs for speed
+      - name: Run pre-commit on PR changes
+        if: github.event_name == 'pull_request'
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.sha }}
+
+      # Run on all files when pushing to main
+      - name: Run pre-commit on all files (main)
+        if: github.event_name == 'push'
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements-dev.txt coverage==7.16.0
+
+      - name: Run unit tests under coverage
+        run: coverage run -m pytest backend/tests
+        env:
+          PYTHONPATH: backend
+
+      # Not gated on a threshold yet -- this establishes a baseline so we can
+      # track coverage over time before deciding where to set the bar.
+      - name: Report coverage
+        if: always()
+        run: |
+          {
+            echo '### Coverage report'
+            echo '```'
+            coverage report -m
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"

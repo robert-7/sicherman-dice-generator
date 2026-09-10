@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from time import perf_counter
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 from .generator import generate_solutions
 

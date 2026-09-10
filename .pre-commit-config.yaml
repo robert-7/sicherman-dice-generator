@@ -1,0 +1,100 @@
+---
+# Adding plugins: https://pre-commit.com/#plugins
+
+# Never operate on generated / vendored files.
+exclude: '^(frontend/node_modules/|frontend/dist/|frontend/package-lock\.json$)'
+
+repos:
+
+  # general linting
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: fix-byte-order-marker
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+        description: Forces to replace line ending by the UNIX 'lf' character.
+      - id: pretty-format-json
+        args: ['--no-sort-keys', '--autofix']
+      - id: file-contents-sorter
+        name: Keep requirements files sorted
+        files: ^backend/requirements(-dev)?\.txt$
+
+  - repo: https://github.com/sirosen/texthooks
+    rev: 0.7.1
+    hooks:
+      - id: fix-smartquotes
+      - id: fix-spaces
+      - id: fix-unicode-dashes
+
+  # python linting
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.17.0
+    hooks:
+      - id: reorder-python-imports
+
+  # markdown linting
+  - repo: https://github.com/markdownlint/markdownlint
+    rev: v0.17.0
+    hooks:
+      - id: markdownlint
+        args: ['--style', '.markdownlint.rb']
+        # Ensure pre-commit uses the system Ruby (e.g., /usr/bin/ruby 3.2)
+        # instead of looking for a specific rubyX.Y binary like /usr/bin/ruby3.0
+        language_version: system
+
+  # python linting
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.21.2
+    hooks:
+      - id: pyupgrade
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        entry: yamllint -c .yamllint.yaml --strict .
+
+  # local hooks
+  - repo: local
+    hooks:
+      # Type-check touched source files with pyright (standard mode, config in
+      # pyrightconfig.json). Uses an isolated env (language: python) with the
+      # runtime deps so imports resolve in CI without installing requirements.txt.
+      # pass_filenames acts as a ratchet: only files changed in the commit are
+      # checked, so pre-existing type debt does not block commits, but new debt
+      # in touched files does.
+      - id: pyright
+        name: Type check (pyright, standard)
+        entry: pyright
+        language: python
+        pass_filenames: true
+        files: ^backend/app/.*\.py$
+        additional_dependencies:
+          - pyright==1.1.411
+          - fastapi==0.141.1
+          - uvicorn[standard]==0.52.4
+          - sympy==1.14.0
+          - pydantic==2.13.5
+
+      # Run the unit test suite. Uses an isolated env (language: python) so it
+      # works in CI without the workflow installing requirements.txt.
+      # PYTHONPATH=backend so `import app...` resolves from backend/.
+      - id: pytest
+        name: Run unit tests
+        entry: bash -c 'PYTHONPATH=backend python -m pytest backend/tests "$@"' --
+        language: python
+        # Keep in sync with requirements-dev.txt (only what the tests import).
+        additional_dependencies:
+          - fastapi==0.141.1
+          - uvicorn[standard]==0.52.4
+          - sympy==1.14.0
+          - pydantic==2.13.5
+          - pytest==9.1.1
+          - httpx==0.28.1
+        pass_filenames: false
+        files: \.py$
