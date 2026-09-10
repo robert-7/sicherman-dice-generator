@@ -2,9 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import lru_cache
+from typing import cast
 from typing import Iterable
 
-from sympy import Poly, Symbol, cyclotomic_poly, divisors, factorint
+from sympy import cyclotomic_poly
+from sympy import divisors
+from sympy import factorint
+from sympy import Poly
+from sympy import Symbol
 
 x = Symbol("x")
 
@@ -21,14 +26,14 @@ class DieCandidate:
 
 
 def _factor_value_at_one(d: int) -> int:
-    return int(cyclotomic_poly(d, x).subs(x, 1))
+    return int(cast(int, cyclotomic_poly(d, x).subs(x, 1)))
 
 
 @lru_cache(maxsize=128)
 def _factor_coefficients(d: int) -> tuple[int, ...]:
     poly = Poly(cyclotomic_poly(d, x), x)
-    degree = poly.degree()
-    return tuple(int(poly.nth(i)) for i in range(degree + 1))
+    degree = cast(int, poly.degree())
+    return tuple(int(cast(int, poly.nth(i))) for i in range(degree + 1))
 
 
 def _convolve(a: tuple[int, ...], b: tuple[int, ...]) -> tuple[int, ...]:

@@ -39,7 +39,7 @@ This is the same method used in Robert Lech's *Proof on the Uniqueness of the Si
 docker compose up --build
 ```
 
-Then open http://localhost:3000. Nginx serves the frontend and proxies `/api` to the FastAPI service.
+Then open <http://localhost:3000>. Nginx serves the frontend and proxies `/api` to the FastAPI service.
 
 ### Without Docker
 
@@ -76,7 +76,7 @@ The response contains every unordered solution found, marks the ordinary solutio
 
 ## Bounds
 
-The public API currently accepts **1–4 dice** and **2–20 faces per die**. Every result within those bounds is enumerated exhaustively—there is no silent truncation. These are implementation safeguards rather than mathematical restrictions; larger inputs can produce very large solution sets.
+The public API currently accepts **1-4 dice** and **2-20 faces per die**. Every result within those bounds is enumerated exhaustively--there is no silent truncation. These are implementation safeguards rather than mathematical restrictions; larger inputs can produce very large solution sets.
 
 ## Development checks
 
