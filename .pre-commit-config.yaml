@@ -19,6 +19,10 @@ repos:
         description: Forces to replace line ending by the UNIX 'lf' character.
       - id: pretty-format-json
         args: ['--no-sort-keys', '--autofix']
+        # Prettier owns all formatting under frontend/ (see the local
+        # prettier-frontend hook); keep the two formatters from fighting over
+        # frontend JSON (package.json, tsconfig.json).
+        exclude: ^frontend/
       - id: file-contents-sorter
         name: Keep requirements files sorted
         files: ^backend/requirements(-dev)?\.txt$
@@ -62,6 +66,28 @@ repos:
   # local hooks
   - repo: local
     hooks:
+      # Frontend (React/TypeScript) linting and formatting. These run through
+      # the frontend's own pinned toolchain (frontend/node_modules), so they
+      # need `npm install` to have been run in frontend/ locally. They are
+      # skipped in the pre-commit CI workflow (which only provisions Python) via
+      # SKIP; the authoritative CI gate for the frontend is the job in
+      # .github/workflows/ci.yml. pass_filenames is false because eslint/prettier
+      # resolve their own file sets from config; the `files` regex just decides
+      # whether the hook runs for a given commit.
+      - id: eslint-frontend
+        name: ESLint (frontend)
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx|mjs|cjs)$
+        pass_filenames: false
+
+      - id: prettier-frontend
+        name: Prettier check (frontend)
+        entry: bash -c 'cd frontend && npm run format:check'
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx|mjs|cjs|css|html|json)$
+        pass_filenames: false
+
       # Type-check touched source files with pyright (standard mode, config in
       # pyrightconfig.json). Uses an isolated env (language: python) with the
       # runtime deps so imports resolve in CI without installing requirements.txt.

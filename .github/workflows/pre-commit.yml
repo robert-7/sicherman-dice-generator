@@ -39,10 +39,15 @@ jobs:
         with:
           ruby-version: '3.3'
 
+      # The frontend eslint/prettier hooks are Node-based and are enforced by the
+      # frontend job in ci.yml; skip them here so this Python-only matrix does not
+      # need Node (and does not lint the frontend redundantly across versions).
       # Run only on the diff for PRs for speed
       - name: Run pre-commit on PR changes
         if: github.event_name == 'pull_request'
         uses: pre-commit/action@v3.0.1
+        env:
+          SKIP: eslint-frontend,prettier-frontend
         with:
           extra_args: --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.sha }}
 
@@ -50,6 +55,8 @@ jobs:
       - name: Run pre-commit on all files (main)
         if: github.event_name == 'push'
         uses: pre-commit/action@v3.0.1
+        env:
+          SKIP: eslint-frontend,prettier-frontend
         with:
           extra_args: --all-files
 

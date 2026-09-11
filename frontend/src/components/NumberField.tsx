@@ -20,7 +20,12 @@ export function NumberField({
     <label className="number-field">
       <span className="number-field__label">{label}</span>
       <span className="stepper">
-        <button type="button" onClick={() => update(value - 1)} disabled={value <= min} aria-label={`Decrease ${label}`}>
+        <button
+          type="button"
+          onClick={() => update(value - 1)}
+          disabled={value <= min}
+          aria-label={`Decrease ${label}`}
+        >
           <Minus size={17} />
         </button>
         <input
@@ -30,7 +35,12 @@ export function NumberField({
           value={value}
           onChange={(event) => update(Number(event.target.value) || min)}
         />
-        <button type="button" onClick={() => update(value + 1)} disabled={value >= max} aria-label={`Increase ${label}`}>
+        <button
+          type="button"
+          onClick={() => update(value + 1)}
+          disabled={value >= max}
+          aria-label={`Increase ${label}`}
+        >
           <Plus size={17} />
         </button>
       </span>
