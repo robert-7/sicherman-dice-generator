@@ -11,55 +11,66 @@ The project generalizes the same polynomial-factorization argument to a configur
 
 ## How it works
 
-A standard `s`-sided die has generating polynomial
+A standard $s$-sided die has generating polynomial
 
-```text
-R_s(x) = x + x² + ... + xˢ
-       = x · ∏ Φ_d(x),  d | s, d > 1.
-```
+$$
+R_s(x) = x + x^2 + \cdots + x^s = x \prod_{d \mid s,\ d > 1} \Phi_d(x)
+$$
 
-For `n` ordinary dice, the sum distribution is encoded by `R_s(x)^n`. By unique factorization, every alternative die polynomial must redistribute the available `x` and cyclotomic factors.
+For $n$ ordinary dice, the sum distribution is encoded by $R_s(x)^n$. By unique factorization, every alternative die polynomial must redistribute the available $x$ and cyclotomic factors.
 
-Because labels must be positive, every die must contribute exactly one factor of `x`. We enumerate the remaining cyclotomic-factor allocations, retain only polynomials with non-negative integer coefficients and exactly `s` faces, then find unordered `n`-tuples whose factor exponents add back to the target. Matching the product means matching the entire sum distribution coefficient-for-coefficient.
+Because labels must be positive, every die must contribute exactly one factor of $x$. We enumerate the remaining cyclotomic-factor allocations, retain only polynomials with non-negative integer coefficients and exactly $s$ faces, then find unordered $n$-tuples whose factor exponents add back to the target. Matching the product means matching the entire sum distribution coefficient-for-coefficient.
 
-This is the same method used in Robert Lech's *Proof on the Uniqueness of the Sicherman Dice*, extended algorithmically to arbitrary supported `n` and `s`.
+This is the same method used in Robert Lech's *Proof on the Uniqueness of the Sicherman Dice*, extended algorithmically to arbitrary supported $n$ and $s$.
 
 ## Stack
 
 - **Frontend:** React + TypeScript + Vite
 - **Backend:** FastAPI + SymPy
-- **Tests:** Pytest (backend) + Vitest (frontend), 100% coverage enforced
+- **Unit tests:** Pytest (backend) + Vitest (frontend), 100% coverage enforced
+- **End-to-end tests:** Playwright, driven against the Docker Compose stack
 - **Local orchestration:** Docker Compose
 
-## Run locally
+## Setup
 
-### Docker Compose
+### Prerequisites
 
-```bash
-docker compose up --build
-```
+- **Docker Compose** (recommended -- no local Node.js or Python needed), or
+- **Node.js 24+** and **Python 3.11+** to run the frontend and backend directly
 
-Then open <http://localhost:3000>. Nginx serves the frontend and proxies `/api` to the FastAPI service.
+### Quickstart (Docker Compose)
 
-### Without Docker
+1. From the repo root, build and start both services:
 
-Backend:
+   ```bash
+   docker compose up --build
+   ```
 
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-dev.txt
-uvicorn app.main:app --reload
-```
+1. Open <http://localhost:3000>. Nginx serves the frontend and proxies `/api` requests to the
+   FastAPI backend.
 
-Frontend:
+### Manual setup (without Docker)
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+1. Start the backend:
+
+   ```bash
+   cd backend
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements-dev.txt
+   uvicorn app.main:app --reload
+   ```
+
+1. In a second terminal, start the frontend:
+
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+1. Open <http://localhost:5173>. Vite's dev server proxies `/api` requests to
+   `http://localhost:8000` (see `frontend/vite.config.ts`).
 
 ## API
 
@@ -80,10 +91,16 @@ The public API currently accepts **1-4 dice** and **2-20 faces per die**. Every 
 
 ## Development checks
 
-```bash
-# Backend tests under coverage (gate: 100%, configured in .coveragerc)
-PYTHONPATH=backend coverage run -m pytest backend/tests && coverage report
+### Backend
 
+```bash
+# Tests under coverage (gate: 100%, configured in .coveragerc)
+PYTHONPATH=backend coverage run -m pytest backend/tests && coverage report
+```
+
+### Frontend
+
+```bash
 cd frontend
 npm run lint          # ESLint (type-aware)
 npm run format:check  # Prettier
@@ -95,6 +112,19 @@ npm run build         # typecheck + production build
 
 Use `npm run lint:fix` and `npm run format` to auto-fix. These frontend checks
 also run via pre-commit (locally) and the `frontend` CI job.
+
+### End-to-end (Playwright)
+
+```bash
+cd e2e
+npm install
+npx playwright install --with-deps chromium
+npm test
+```
+
+`playwright.config.ts` builds and starts the full Docker Compose stack itself, then drives a real
+browser against it -- catching integration issues unit tests can't, like a frontend/backend
+contract mismatch or a broken nginx proxy rule. Also runs in the `e2e` CI job.
 
 ## Test coverage
 
@@ -108,6 +138,9 @@ build:
 - **Frontend:** measured by Vitest's v8 provider; the 100% thresholds live in
   `vite.config.ts` and run in the `frontend` CI job. The app bootstrap
   (`main.tsx`) and type-only modules are excluded from measurement.
+
+The Playwright suite is a separate integration/smoke layer against the real stack and isn't part
+of the coverage gate.
 
 ## Mathematical references
 
