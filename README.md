@@ -82,8 +82,16 @@ The public API currently accepts **1-4 dice** and **2-20 faces per die**. Every 
 
 ```bash
 PYTHONPATH=backend pytest backend/tests
-cd frontend && npm run build
+
+cd frontend
+npm run lint          # ESLint (type-aware)
+npm run format:check  # Prettier
+npm run typecheck     # tsc --noEmit
+npm run build         # typecheck + production build
 ```
+
+Use `npm run lint:fix` and `npm run format` to auto-fix. These frontend checks
+also run via pre-commit (locally) and the `frontend` CI job.
 
 ## Mathematical references
 
