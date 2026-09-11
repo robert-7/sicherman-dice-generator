@@ -24,6 +24,10 @@ jobs:
         run: npm run lint
       - name: Check formatting (Prettier)
         run: npm run format:check
+      # Runs the Vitest suite under v8 coverage and fails if any metric drops
+      # below the 100% thresholds configured in vite.config.ts.
+      - name: Test with coverage (100% gate)
+        run: npm run coverage
       # `build` runs `tsc --noEmit` (type check) before `vite build`.
       - name: Build
         run: npm run build

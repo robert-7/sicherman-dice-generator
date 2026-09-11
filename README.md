@@ -28,7 +28,7 @@ This is the same method used in Robert Lech's *Proof on the Uniqueness of the Si
 
 - **Frontend:** React + TypeScript + Vite
 - **Backend:** FastAPI + SymPy
-- **Tests:** Pytest
+- **Tests:** Pytest (backend) + Vitest (frontend), 100% coverage enforced
 - **Local orchestration:** Docker Compose
 
 ## Run locally
@@ -81,17 +81,33 @@ The public API currently accepts **1-4 dice** and **2-20 faces per die**. Every 
 ## Development checks
 
 ```bash
-PYTHONPATH=backend pytest backend/tests
+# Backend tests under coverage (gate: 100%, configured in .coveragerc)
+PYTHONPATH=backend coverage run -m pytest backend/tests && coverage report
 
 cd frontend
 npm run lint          # ESLint (type-aware)
 npm run format:check  # Prettier
 npm run typecheck     # tsc --noEmit
+npm run test          # Vitest (watch)
+npm run coverage      # Vitest + v8 coverage (gate: 100%)
 npm run build         # typecheck + production build
 ```
 
 Use `npm run lint:fix` and `npm run format` to auto-fix. These frontend checks
 also run via pre-commit (locally) and the `frontend` CI job.
+
+## Test coverage
+
+Both sides of the stack enforce **100%** coverage in CI, and a drop fails the
+build:
+
+- **Backend:** measured by [coverage.py](https://coverage.readthedocs.io);
+  `fail_under = 100` lives in `.coveragerc`. The pre-commit `pytest` hook and the
+  `coverage` CI job both enforce it. Genuinely unreachable defensive code is
+  marked with `# pragma: no cover` and explained inline.
+- **Frontend:** measured by Vitest's v8 provider; the 100% thresholds live in
+  `vite.config.ts` and run in the `frontend` CI job. The app bootstrap
+  (`main.tsx`) and type-only modules are excluded from measurement.
 
 ## Mathematical references
 
