@@ -46,9 +46,3 @@ behavior (API contract, nginx proxy, request/response shape), also run the Playw
 - `e2e/` -- Playwright suite; a separate npm project (its own `package.json`), not part of
   `frontend/`. It exercises the built Docker images, not the Vite dev server, so it also catches
   nginx proxy and production-build regressions that frontend unit tests can't.
-
-## GitHub
-
-This repo is under the `robert-7` GitHub account. If `gh` commands fail with permission or auth
-errors, check `gh auth status` and switch with `gh auth switch --user robert-7` if the active
-account isn't `robert-7`.
