@@ -2,7 +2,7 @@
 # Adding plugins: https://pre-commit.com/#plugins
 
 # Never operate on generated / vendored files.
-exclude: '^(frontend/node_modules/|frontend/dist/|frontend/package-lock\.json$)'
+exclude: '^(frontend|e2e)/(node_modules|dist|playwright-report|test-results)/|^(frontend|e2e)/package-lock\.json$'
 
 repos:
 
