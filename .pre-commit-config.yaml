@@ -107,15 +107,18 @@ repos:
           - sympy==1.14.0
           - pydantic==2.13.5
 
-      # Run the unit test suite. Uses an isolated env (language: python) so it
-      # works in CI without the workflow installing requirements.txt.
-      # PYTHONPATH=backend so `import app...` resolves from backend/.
+      # Run the unit test suite under coverage. Uses an isolated env
+      # (language: python) so it works in CI without the workflow installing
+      # requirements.txt. PYTHONPATH=backend so `import app...` resolves from
+      # backend/. `coverage report` fails the hook if coverage drops below the
+      # fail_under threshold in .coveragerc (100%).
       - id: pytest
-        name: Run unit tests
-        entry: bash -c 'PYTHONPATH=backend python -m pytest backend/tests "$@"' --
+        name: Run unit tests (100% coverage gate)
+        entry: bash -c 'PYTHONPATH=backend coverage run -m pytest backend/tests "$@" && coverage report' --
         language: python
         # Keep in sync with requirements-dev.txt (only what the tests import).
         additional_dependencies:
+          - coverage==7.16.0
           - fastapi==0.141.1
           - uvicorn[standard]==0.52.4
           - sympy==1.14.0

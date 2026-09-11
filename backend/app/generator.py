@@ -164,7 +164,12 @@ def generate_solutions(dice: int, faces: int) -> dict:
             nxt = tuple(remaining[j] - exps[j] for j in range(len(ds)))
             if slots == 1 and any(nxt):
                 continue
-            if any(v > (slots - 1) * dice for v in nxt):
+            # Defensive prune: unreachable for every supported input (1-4 dice,
+            # 2-20 faces). Each remaining exponent is at most `dice`, and for
+            # slots >= 2 the bound (slots - 1) * dice is >= dice, so the guard
+            # never fires; the slots == 1 case is already handled above. Kept as
+            # a safety net but excluded from coverage since no input exercises it.
+            if any(v > (slots - 1) * dice for v in nxt):  # pragma: no cover
                 continue
 
             chosen.append(idx)

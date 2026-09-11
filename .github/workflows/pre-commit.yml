@@ -73,15 +73,15 @@ jobs:
           python-version: '3.14'
 
       - name: Install dependencies
-        run: pip install -r backend/requirements-dev.txt coverage==7.16.0
+        run: pip install -r backend/requirements-dev.txt
 
       - name: Run unit tests under coverage
         run: coverage run -m pytest backend/tests
         env:
           PYTHONPATH: backend
 
-      # Not gated on a threshold yet -- this establishes a baseline so we can
-      # track coverage over time before deciding where to set the bar.
+      # Always publish the report to the job summary, even when the gate below
+      # fails, so a coverage drop is easy to diagnose.
       - name: Report coverage
         if: always()
         run: |
@@ -91,3 +91,8 @@ jobs:
             coverage report -m
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Gate: fail the job if coverage is below the fail_under threshold in
+      # .coveragerc (100%). `coverage report` exits non-zero when under target.
+      - name: Enforce 100% coverage
+        run: coverage report

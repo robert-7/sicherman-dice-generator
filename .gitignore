@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
+coverage/
 .venv/
 node_modules/
 dist/
